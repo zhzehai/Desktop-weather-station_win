@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>天气显示台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="bgCanvas" class="bg-canvas"></canvas>
+  <main class="stage">
+    <!-- ====== 顶部栏：时间日期 + 预警 ====== -->
+    <header class="top-bar">
+      <div class="clock-block">
+        <div class="time-block">
+          <span class="time-hm" id="timeHM">--:--</span>
+          <span class="time-ss" id="timeSS">--</span>
+        </div>
+        <div class="date-block">
+          <div class="date-row">
+            <span class="solar" id="solarDate">----年-月-日</span>
+            <span class="weekday" id="weekday">星期-</span>
+          </div>
+          <div class="lunar-row">
+            <span class="lunar" id="lunarDate">农历 …</span>
+            <span class="ganzhi" id="ganzhi">— — 年</span>
+            <span class="solar-term" id="solarTerm"></span>
+          </div>
+          <div class="holiday-row"><span class="holiday-tag" id="holidayTag"></span></div>
+        </div>
+      </div>
+      <div class="alert-area">
+        <div class="alert-list" id="alertList"></div>
+      </div>
+      <button id="fullscreenBtn" class="fullscreen-btn" title="全屏显示 (F11)">⛶</button>
+    </header>
+
+    <!-- ====== 天气区域 ====== -->
+    <section class="weather-panel">
+      <div class="page">
+
+        <!-- ── 今日天气主区块 ── -->
+        <div class="today-block">
+          <!-- 主体：左侧温度 + 右侧网格 -->
+          <div class="today-main-row">
+            <div class="today-left">
+              <div class="today-city" id="todayLocation">—</div>
+              <div class="today-temp-wrap">
+                <span class="today-temp" id="todayTemp">--</span>
+                <span class="today-unit">°C</span>
+              </div>
+              <div class="today-weather">
+                <span class="weather-icon" id="todayIcon"></span>
+                <span id="todayWeather">—</span>
+                <span class="live-dot"></span>
+              </div>
+              <div class="today-feels" id="todayFeels">体感 —</div>
+              <div class="summary-tip" id="summaryTip"></div>
+              <div class="meta-row" id="metaRow">
+                <span class="meta-dot"></span>
+                <div class="meta-text-wrap">
+                  <span class="meta-text" id="updateMeta">等待数据</span>
+                </div>
+              </div>
+            </div>
+            <!-- 分组网格 -->
+            <div class="today-grid">
+              <!-- 今日详情：8项气象数据 -->
+              <div class="gc-section">
+                <div class="gc-section-grid">
+                  <div class="gc-cell">
+                    <span class="gc-icon">🌡</span>
+                    <span class="gc-label">最高</span>
+                    <span class="gc-value" id="todayDayTemp">--°</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">❄</span>
+                    <span class="gc-label">最低</span>
+                    <span class="gc-value cool" id="todayNightTemp">--°</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">💧</span>
+                    <span class="gc-label">湿度</span>
+                    <span class="gc-value" id="todayHumidity">—</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">🌬</span>
+                    <span class="gc-label">风向</span>
+                    <span class="gc-value" id="todayWind">—</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">🌅</span>
+                    <span class="gc-label">日出</span>
+                    <span class="gc-value" id="sunrise">--:--</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">🌇</span>
+                    <span class="gc-label">日落</span>
+                    <span class="gc-value" id="sunset">--:--</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">🌀</span>
+                    <span class="gc-label">气压</span>
+                    <span class="gc-value" id="todayPressure">—</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">👁</span>
+                    <span class="gc-label">能见度</span>
+                    <span class="gc-value" id="todayVis">—</span>
+                  </div>
+                </div>
+              </div>
+              <!-- 生活指数：6项 -->
+              <div class="gc-section">
+                <div class="gc-section-grid gc-section-grid--6">
+                  <div class="gc-cell">
+                    <span class="gc-icon">👕</span>
+                    <span class="gc-label">穿衣</span>
+                    <span class="gc-value" id="idxCloth">—</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">🚗</span>
+                    <span class="gc-label">洗车</span>
+                    <span class="gc-value" id="idxCar">—</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">🏃</span>
+                    <span class="gc-label">运动</span>
+                    <span class="gc-value" id="idxSport">—</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">🧴</span>
+                    <span class="gc-label">紫外线</span>
+                    <span class="gc-value" id="idxUv">—</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">🤧</span>
+                    <span class="gc-label">感冒</span>
+                    <span class="gc-value" id="idxCold">—</span>
+                  </div>
+                  <div class="gc-cell">
+                    <span class="gc-icon">✈️</span>
+                    <span class="gc-label">旅游</span>
+                    <span class="gc-value" id="idxTravel">—</span>
+                  </div>
+                </div>
+              </div>
+              <!-- 空气质量 -->
+              <div class="today-air-bar">
+                <span class="air-label">空气质量</span>
+                <span class="air-val" id="airAqi">--</span>
+                <span class="air-level" id="airLevel">—</span>
+                <div class="air-gauge" id="aqiGauge"></div>
+                <span class="air-divider"></span>
+                <span class="air-items">
+                  <span class="air-item">PM₂.₅ <b id="airPm25">—</b></span>
+                  <span class="air-item">PM₁₀ <b id="airPm10">—</b></span>
+                  <span class="air-item">NO₂ <b id="airNo2">—</b></span>
+                  <span class="air-item">O₃ <b id="airO3">—</b></span>
+                  <span class="air-item">SO₂ <b id="airSo2">—</b></span>
+                  <span class="air-item">CO <b id="airCo">—</b></span>
+                </span>
+              </div>
+              <!-- 室内数据：突出显示 -->
+              <div class="gc-section gc-section--indoor">
+                <div class="gc-section-head">
+                  <span class="gc-section-label">室内环境</span>
+                  <span class="gc-indoor-status" id="indoorStatus">等待传感器</span>
+                </div>
+                <div class="gc-indoor-row">
+                  <div class="gc-cell gc-cell--indoor">
+                    <span class="gc-icon">🌡</span>
+                    <span class="gc-label">温度</span>
+                    <span class="gc-value" id="indoorTemp">--</span>
+                    <span class="gc-unit">°C</span>
+                  </div>
+                  <div class="gc-cell gc-cell--indoor">
+                    <span class="gc-icon">💧</span>
+                    <span class="gc-label">湿度</span>
+                    <span class="gc-value" id="indoorHumi">--</span>
+                    <span class="gc-unit">%</span>
+                  </div>
+                  <div class="gc-cell gc-cell--indoor">
+                    <span class="gc-icon">🧪</span>
+                    <span class="gc-label">VOC</span>
+                    <span class="gc-value" id="indoorVoc">--</span>
+                    <span class="gc-unit">ppb</span>
+                  </div>
+                  <div class="gc-cell gc-cell--indoor">
+                    <span class="gc-icon">⚗️</span>
+                    <span class="gc-label">甲醛</span>
+                    <span class="gc-value" id="indoorHcho">--</span>
+                    <span class="gc-unit">mg</span>
+                  </div>
+                  <div class="gc-cell gc-cell--indoor">
+                    <span class="gc-icon">💨</span>
+                    <span class="gc-label">CO₂</span>
+                    <span class="gc-value" id="indoorCo2">--</span>
+                    <span class="gc-unit">ppm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── 逐小时预报 ── -->
+        <div class="hourly-block">
+          <div class="hourly-scroll" id="hourlyScroll"></div>
+        </div>
+
+        <!-- ── 底部：3天预报 ── -->
+        <div class="bottom-row">
+          <div class="forecast-block">
+            <div class="fc-card yesterday">
+              <div class="fc-head">
+                <span class="fc-day muted">昨天</span>
+                <span class="fc-sub" id="yesterdaySub">—</span>
+              </div>
+              <div class="fc-body">
+                <span class="weather-icon fc-icon" id="yesterdayIcon"></span>
+                <span class="fc-weather" id="yesterdayWeather">—</span>
+                <span class="fc-temp"><b id="yesterdayDayTemp">--</b>/<i id="yesterdayNightTemp">--</i>°</span>
+              </div>
+            </div>
+            <div class="fc-card accent">
+              <div class="fc-head">
+                <span class="fc-day">明天</span>
+                <span class="fc-sub" id="tomorrowSub">—</span>
+              </div>
+              <div class="fc-body">
+                <span class="weather-icon fc-icon" id="tomorrowIcon"></span>
+                <span class="fc-weather" id="tomorrowWeather">—</span>
+                <span class="fc-temp"><b id="tomorrowDayTemp">--</b>/<i id="tomorrowNightTemp">--</i>°<span class="fc-trend" id="tomorrowTrend"></span></span>
+              </div>
+            </div>
+            <div class="fc-card">
+              <div class="fc-head">
+                <span class="fc-day">后天</span>
+                <span class="fc-sub" id="day3Sub">—</span>
+              </div>
+              <div class="fc-body">
+                <span class="weather-icon fc-icon" id="day3Icon"></span>
+                <span class="fc-weather" id="day3Weather">—</span>
+                <span class="fc-temp"><b id="day3DayTemp">--</b>/<i id="day3NightTemp">--</i>°<span class="fc-trend" id="day3Trend"></span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====== 底部信息栏 ====== -->
+    <footer class="bottom-bar">
+      <div class="city-row">
+        <div class="city-search" id="citySearch">
+          <input type="text" id="cityInput" class="city-input" placeholder="搜索城市..." autocomplete="off" />
+          <div class="city-dropdown hidden" id="cityDropdown"></div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
