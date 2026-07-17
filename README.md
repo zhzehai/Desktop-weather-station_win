@@ -8,7 +8,9 @@
 一、项目概述
 ==========================================================
 本项目是一个专业的天气显示应用，专为7寸触摸屏设计，部署在树莓派上。采用"深空玻璃"设计风格，以琥珀色为主色调，强调信息分层和视觉焦点。
+
 <img width="580" height="339" alt="image" src="https://github.com/user-attachments/assets/88daf573-2741-4a8e-a34a-ebb36b0469d1" />
+
 图1-1：天气显示台完整页面效果图
 二、功能优先级总览
 <img width="774" height="543" alt="image" src="https://github.com/user-attachments/assets/1d90390d-1974-417c-9ab3-de82788a86ee" />
