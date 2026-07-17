@@ -12,8 +12,11 @@
 <img width="580" height="339" alt="image" src="https://github.com/user-attachments/assets/88daf573-2741-4a8e-a34a-ebb36b0469d1" />
 
 图1-1：天气显示台完整页面效果图
+
 二、功能优先级总览
+
 <img width="774" height="543" alt="image" src="https://github.com/user-attachments/assets/1d90390d-1974-417c-9ab3-de82788a86ee" />
+
 三、核心功能详细说明
 3.1 实时天气（P0级）
 【功能描述】：展示当前城市的实时气象数据，包括温度、天气状况、体感温度、最高/最低温、日出日落时间等。
