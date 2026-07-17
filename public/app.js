@@ -1193,13 +1193,8 @@ const SOLAR_TERMS = {
       const timeLabel = isNow ? '现在' : pad(hour) + ':00';
       const pop = safeParseInt(item.pop);
       const temp = safeParseInt(item.temp);
-      // 图标始终用天气码，它是API的权威气象判断
-      let icon;
-      if (isNow && currentObsText) {
-        icon = obsTextToEmoji(currentObsText);
-      } else {
-        icon = getHourlyIcon(item.icon);
-      }
+      // 图标：统一使用天气码和降水概率判断
+      let icon = getHourlyIcon(item.icon, item.text, item.pop);
       // 降水判断以天气码为准，不用pop阈值
       const hasRain = /雨|雷|雪/.test(item.text || '');
       // 降水概率只在天气码已指示降水时显示，或概率≥50%时才显示
@@ -1217,20 +1212,28 @@ const SOLAR_TERMS = {
     container.innerHTML = html;
   }
 
-  function getHourlyIcon(iconCode) {
+  function getHourlyIcon(iconCode, text, pop) {
     if (!iconCode) return '—';
     const code = String(iconCode);
-    if (code === '100') return '☀️';   // 晴
-    if (code === '101') return '🌤️';   // 多云
-    if (code === '102') return '⛅';    // 少云
-    if (code === '103') return '🌤️';   // 晴间多云
-    if (code === '104') return '☁️';    // 阴
-    if (code.startsWith('2')) return '🌦️'; // 有风/阵雨类
-    if (code.startsWith('3') || code.startsWith('6')) return '🌧️';
-    if (code.startsWith('4') || code.startsWith('8')) return '❄️';
-    if (code.startsWith('5')) return '🌫️';
-    if (code.startsWith('7')) return '🌦️';
-    if (code.startsWith('9')) return '💨';
+    const popValue = safeParseInt(pop);
+    const isNightCode = code >= '150' && code <= '154';
+    const baseCode = isNightCode ? String(parseInt(code) - 50) : code;
+    const isPrecipCode = code.startsWith('3') || code.startsWith('6') || 
+                          code.startsWith('4') || code.startsWith('8') || 
+                          code.startsWith('2') || code.startsWith('7');
+    if (isPrecipCode) {
+      if (code.startsWith('4') || code.startsWith('8')) return '❄️';
+      if (code.startsWith('5')) return '🌫️';
+      if (code.startsWith('9')) return '💨';
+      return '🌧️';
+    }
+    if (popValue >= 60) return '🌧️';
+    if (popValue >= 40) return '🌦️';
+    if (popValue >= 20) return '🌤️';
+    if (baseCode === '100') return '☀️';
+    if (baseCode === '101' || baseCode === '103') return '🌤️';
+    if (baseCode === '102') return '⛅';
+    if (baseCode === '104') return '☁️';
     return '☀️';
   }
 
